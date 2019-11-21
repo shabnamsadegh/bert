@@ -56,7 +56,8 @@ def create_model(is_training, input_ids, input_mask, segment_ids, labels,
   # If you want to use the token-level output, use
   # bert_outputs["sequence_output"] instead.
   output_layer = bert_outputs["pooled_output"]
-
+  all_layers = bert_outputs["all_encoder_layers"]
+  
   hidden_size = output_layer.shape[-1].value
 
   output_weights = tf.get_variable(
@@ -81,7 +82,7 @@ def create_model(is_training, input_ids, input_mask, segment_ids, labels,
     per_example_loss = -tf.reduce_sum(one_hot_labels * log_probs, axis=-1)
     loss = tf.reduce_mean(per_example_loss)
 
-    return (loss, per_example_loss, logits, probabilities, bert_outputs)# I added bert outputs for the visualization purpuses
+    return (loss, per_example_loss, logits, probabilities, all_layers)# I added all layers for the visualization purpuses
 
 
 def model_fn_builder(num_labels, learning_rate, num_train_steps,
@@ -102,7 +103,7 @@ def model_fn_builder(num_labels, learning_rate, num_train_steps,
 
     is_training = (mode == tf.estimator.ModeKeys.TRAIN)
 
-    (total_loss, per_example_loss, logits, probabilities, bert_outputs) = create_model(
+    (total_loss, per_example_loss, logits, probabilities, all_layers) = create_model(
         is_training, input_ids, input_mask, segment_ids, label_ids, num_labels,
         bert_hub_module_handle)
 
@@ -132,8 +133,9 @@ def model_fn_builder(num_labels, learning_rate, num_train_steps,
           loss=total_loss,
           eval_metrics=eval_metrics)
     elif mode == tf.estimator.ModeKeys.PREDICT:
+      print("This is a debugging message")
       output_spec = tf.contrib.tpu.TPUEstimatorSpec(
-          mode=mode, predictions={"probabilities": probabilities, "bert_outputs": bert_outputs}) # I added the bert_outputs for visualization of layers
+          mode=mode, predictions={"probabilities": probabilities, "all_layers": all_layers}) # I added the bert_outputs for visualization of layers
     else:
       raise ValueError(
           "Only TRAIN, EVAL and PREDICT modes are supported: %s" % (mode))
