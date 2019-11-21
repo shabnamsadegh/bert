@@ -81,7 +81,7 @@ def create_model(is_training, input_ids, input_mask, segment_ids, labels,
     per_example_loss = -tf.reduce_sum(one_hot_labels * log_probs, axis=-1)
     loss = tf.reduce_mean(per_example_loss)
 
-    return (loss, per_example_loss, logits, probabilities)
+    return (loss, per_example_loss, logits, probabilities, bert_outputs)# I added bert outputs for the visualization purpuses
 
 
 def model_fn_builder(num_labels, learning_rate, num_train_steps,
@@ -102,7 +102,7 @@ def model_fn_builder(num_labels, learning_rate, num_train_steps,
 
     is_training = (mode == tf.estimator.ModeKeys.TRAIN)
 
-    (total_loss, per_example_loss, logits, probabilities) = create_model(
+    (total_loss, per_example_loss, logits, probabilities, bert_outputs) = create_model(
         is_training, input_ids, input_mask, segment_ids, label_ids, num_labels,
         bert_hub_module_handle)
 
@@ -133,7 +133,7 @@ def model_fn_builder(num_labels, learning_rate, num_train_steps,
           eval_metrics=eval_metrics)
     elif mode == tf.estimator.ModeKeys.PREDICT:
       output_spec = tf.contrib.tpu.TPUEstimatorSpec(
-          mode=mode, predictions={"probabilities": probabilities})
+          mode=mode, predictions={"probabilities": probabilities, "bert_outputs": bert_outputs}) # I added the bert_outputs for visualization of layers
     else:
       raise ValueError(
           "Only TRAIN, EVAL and PREDICT modes are supported: %s" % (mode))
