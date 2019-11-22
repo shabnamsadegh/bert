@@ -56,7 +56,14 @@ def create_model(is_training, input_ids, input_mask, segment_ids, labels,
   # If you want to use the token-level output, use
   # bert_outputs["sequence_output"] instead.
   output_layer = bert_outputs["pooled_output"]
-  all_layers = bert_outputs["all_encoder_layers"]
+  seq_output = bert_outputs["sequence_output"]
+  
+  all_encoder_layers = []
+  total_layers = 12 #todo 12 must be a parameter
+  for i in range(1, total_layers + 1):
+    intermediate_layer_name = seq_output.name.replace(str(total_layers + 1), str(desired_layer + 1))
+    all_encoder_layers.append(tf.get_default_graph().get_tensor_by_name(intermediate_layer_name))
+    
   
   hidden_size = output_layer.shape[-1].value
 
@@ -82,7 +89,7 @@ def create_model(is_training, input_ids, input_mask, segment_ids, labels,
     per_example_loss = -tf.reduce_sum(one_hot_labels * log_probs, axis=-1)
     loss = tf.reduce_mean(per_example_loss)
 
-    return (loss, per_example_loss, logits, probabilities, all_layers)# I added all layers for the visualization purpuses
+    return (loss, per_example_loss, logits, probabilities, all_encoder_layers) #added all_encoder_layers for visualization
 
 
 def model_fn_builder(num_labels, learning_rate, num_train_steps,
@@ -103,7 +110,7 @@ def model_fn_builder(num_labels, learning_rate, num_train_steps,
 
     is_training = (mode == tf.estimator.ModeKeys.TRAIN)
 
-    (total_loss, per_example_loss, logits, probabilities, all_layers) = create_model(
+    (total_loss, per_example_loss, logits, probabilities, all_encoder_layers) = create_model(
         is_training, input_ids, input_mask, segment_ids, label_ids, num_labels,
         bert_hub_module_handle)
 
@@ -135,7 +142,7 @@ def model_fn_builder(num_labels, learning_rate, num_train_steps,
     elif mode == tf.estimator.ModeKeys.PREDICT:
       print("This is a debugging message")
       output_spec = tf.contrib.tpu.TPUEstimatorSpec(
-          mode=mode, predictions={"probabilities": probabilities, "all_layers": all_layers}) # I added the bert_outputs for visualization of layers
+          mode=mode, predictions={"probabilities": probabilities, "all_layers": all_encoder_layers}) # I added the bert_outputs for visualization of layers
     else:
       raise ValueError(
           "Only TRAIN, EVAL and PREDICT modes are supported: %s" % (mode))
