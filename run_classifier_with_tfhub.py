@@ -63,7 +63,7 @@ def create_model(is_training, input_ids, input_mask, segment_ids, labels,
   for i in range(1, total_layers + 1):
     intermediate_layer_name = seq_output.name.replace(str(total_layers + 1), str(i + 1))
     all_encoder_layers.append(tf.get_default_graph().get_tensor_by_name(intermediate_layer_name))
-    
+  all_encoder_layers = np.array(all_encoder_layers)  
   
   hidden_size = output_layer.shape[-1].value
 
