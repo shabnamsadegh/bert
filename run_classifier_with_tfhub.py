@@ -61,7 +61,7 @@ def create_model(is_training, input_ids, input_mask, segment_ids, labels,
   all_encoder_layers = []
   total_layers = 12 #todo 12 must be a parameter
   for i in range(1, total_layers + 1):
-    intermediate_layer_name = seq_output.name.replace(str(total_layers + 1), str(desired_layer + 1))
+    intermediate_layer_name = seq_output.name.replace(str(total_layers + 1), str(i + 1))
     all_encoder_layers.append(tf.get_default_graph().get_tensor_by_name(intermediate_layer_name))
     
   
