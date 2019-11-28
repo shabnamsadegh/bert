@@ -58,6 +58,8 @@ def create_model(is_training, input_ids, input_mask, segment_ids, labels,
   # bert_outputs["sequence_output"] instead.
   output_layer = bert_outputs["pooled_output"]
   seq_output = bert_outputs["sequence_output"]
+    
+  print("TTTTTTTTTTTTTTTTTTTTT", seq_output.shape)
   
   all_encoder_layers = []
   total_layers = 12 #todo 12 must be a parameter
