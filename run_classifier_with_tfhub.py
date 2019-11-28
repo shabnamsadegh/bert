@@ -144,12 +144,14 @@ def model_fn_builder(num_labels, learning_rate, num_train_steps,
     elif mode == tf.estimator.ModeKeys.PREDICT:
       print("This is a debugging message")
       output_spec = tf.contrib.tpu.TPUEstimatorSpec(
-          mode=mode, predictions={"probabilities": probabilities, "all_layers":  tf.stack([all_encoder_layers] * probabilities.shape[0])}) # I added the bert_outputs for visualization of layers
+          mode=mode, predictions={"probabilities": probabilities}) 
+      output_all_layer = tf.contrib.tpu.TPUEstimatorSpec(
+          mode=mode, predictions={"all_layers":  all_encoder_layers}) # I added the bert_outputs for visualization of layers  
     else:
       raise ValueError(
           "Only TRAIN, EVAL and PREDICT modes are supported: %s" % (mode))
 
-    return output_spec
+    return output_spec , output_all_layer
 
   return model_fn
 
