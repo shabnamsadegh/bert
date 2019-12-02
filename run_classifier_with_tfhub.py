@@ -59,6 +59,7 @@ def create_model(is_training, input_ids, input_mask, segment_ids, labels,
   output_layer = bert_outputs["pooled_output"]
   seq_output = bert_outputs["sequence_output"]
   
+  print("TTTTTTTTTTTTTTTTTTTTT", input_ids.shape)
   print("TTTTTTTTTTTTTTTTTTTTT", output_layer.shape)
   print("TTTTTTTTTTTTTTTTTTTTT", seq_output.shape)
   
