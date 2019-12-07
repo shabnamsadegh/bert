@@ -410,7 +410,7 @@ class BSProcessor(DataProcessor):
         text_a = tokenization.convert_to_unicode(line[2])
         label = tokenization.convert_to_unicode(line[1])
       examples.append(
-          run_classifier.InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
+          InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
     return examples
 
 def convert_single_example(ex_index, example, label_list, max_seq_length,
