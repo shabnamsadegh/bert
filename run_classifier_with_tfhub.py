@@ -38,6 +38,15 @@ flags.DEFINE_string(
 def create_model(is_training, input_ids, input_mask, segment_ids, labels,
                  num_labels, bert_hub_module_handle):
   """Creates a classification model."""
+  
+  #copied from hsm207/bert_attn_viz
+  def extract_attention_weights(tf_graph):
+        num_layers = bert_config.num_hidden_layers
+        attns = [{'layer_%s' % i: tf_graph.get_tensor_by_name('bert/encoder/layer_%s/attention/self/Softmax:0' % i)}
+                 for i in range(num_layers)]
+
+        return attns
+  
   tags = set()
   if is_training:
     tags.add("train")
@@ -57,19 +66,7 @@ def create_model(is_training, input_ids, input_mask, segment_ids, labels,
   # If you want to use the token-level output, use
   # bert_outputs["sequence_output"] instead.
   output_layer = bert_outputs["pooled_output"]
-  seq_output = bert_outputs["sequence_output"]
-  
-  print("TTTTTTTTTTTTTTTTTTTTT", input_ids.shape)
-  print("TTTTTTTTTTTTTTTTTTTTT", output_layer.shape)
-  print("TTTTTTTTTTTTTTTTTTTTT", seq_output.shape)
-  
-  all_encoder_layers = []
-  total_layers = 12 #todo 12 must be a parameter
-  for i in range(1, total_layers + 1):
-    intermediate_layer_name = seq_output.name.replace(str(total_layers + 1), str(i + 1))
-    all_encoder_layers.append(tf.get_default_graph().get_tensor_by_name(intermediate_layer_name))
-  
-  all_encoder_layers = tf.stack(all_encoder_layers)  
+  seq_output = bert_outputs["sequence_output"]  
   
   hidden_size = output_layer.shape[-1].value
 
@@ -89,13 +86,16 @@ def create_model(is_training, input_ids, input_mask, segment_ids, labels,
     logits = tf.nn.bias_add(logits, output_bias)
     probabilities = tf.nn.softmax(logits, axis=-1)
     log_probs = tf.nn.log_softmax(logits, axis=-1)
-
+    
+    # copied from hsm207/bert_attn_viz
+    attns = extract_attention_weights(tf.get_default_graph())
+    
     one_hot_labels = tf.one_hot(labels, depth=num_labels, dtype=tf.float32)
 
     per_example_loss = -tf.reduce_sum(one_hot_labels * log_probs, axis=-1)
     loss = tf.reduce_mean(per_example_loss)
 
-    return (loss, per_example_loss, logits, probabilities, all_encoder_layers) #added all_encoder_layers for visualization
+    return (loss, per_example_loss, logits, probabilities, attns) #added attns for visualization
 
 
 def model_fn_builder(num_labels, learning_rate, num_train_steps,
@@ -116,11 +116,10 @@ def model_fn_builder(num_labels, learning_rate, num_train_steps,
 
     is_training = (mode == tf.estimator.ModeKeys.TRAIN)
 
-    (total_loss, per_example_loss, logits, probabilities, all_encoder_layers) = create_model(
+    (total_loss, per_example_loss, logits, probabilities, attentions) = create_model(
         is_training, input_ids, input_mask, segment_ids, label_ids, num_labels,
         bert_hub_module_handle)
     
-    output_all_layer = None
     output_spec = None
     if mode == tf.estimator.ModeKeys.TRAIN:
       train_op = optimization.create_optimizer(
@@ -136,10 +135,26 @@ def model_fn_builder(num_labels, learning_rate, num_train_steps,
         predictions = tf.argmax(logits, axis=-1, output_type=tf.int32)
         accuracy = tf.metrics.accuracy(label_ids, predictions)
         loss = tf.metrics.mean(per_example_loss)
-        return {
+        precision = tf.metrics.precision(label_ids, predictions)
+        recall = tf.metrics.recall(label_ids, predictions)
+        fn = tf.metrics.false_negatives(label_ids, predictions)
+        fp = tf.metrics.false_positives(label_ids, predictions)
+        tn = tf.metrics.true_negatives(label_ids, predictions)
+        tp = tf.metrics.true_positives(label_ids, predictions)
+        f1 = tf.contrib.metrics.f1_score(label_ids, predictions)
+
+        return collections.OrderedDict({
             "eval_accuracy": accuracy,
+            'eval_precision': precision,
+            'eval_recall': recall,
+            'eval_tp': tp,
+            'eval_tn': tn,
+            'eval_fp': fp,
+            'eval_fn': fn,
+            'eval_f1': f1,
             "eval_loss": loss,
-        }
+        })
+        
 
       eval_metrics = (metric_fn, [per_example_loss, label_ids, logits])
       output_spec = tf.contrib.tpu.TPUEstimatorSpec(
@@ -148,15 +163,16 @@ def model_fn_builder(num_labels, learning_rate, num_train_steps,
           eval_metrics=eval_metrics)
     elif mode == tf.estimator.ModeKeys.PREDICT:
       print("This is a debugging message")
-      #output_spec = tf.contrib.tpu.TPUEstimatorSpec(
-      #    mode=mode, predictions={"probabilities": probabilities}) 
       output_spec = tf.contrib.tpu.TPUEstimatorSpec(
-          mode=mode, predictions={"all_layers":  all_encoder_layers}) # I added the bert_outputs for visualization of layers  
+          mode=mode, predictions={  'probabilities': probabilities,
+                                    'pred_class': tf.argmax(probabilities, axis=1)
+                                  }) 
+ 
     else:
       raise ValueError(
           "Only TRAIN, EVAL and PREDICT modes are supported: %s" % (mode))
 
-    return output_spec #, output_all_layer
+    return output_spec
 
   return model_fn
 
