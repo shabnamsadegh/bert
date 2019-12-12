@@ -72,7 +72,7 @@ def create_model(is_training, input_ids, input_mask, segment_ids, labels,
   
   hidden_size = output_layer.shape[-1].value
     
-  tf.logging.info("Shabnam look! " + str(hidden_size))
+  tf.logging.info("Shabnam look! " + str(output_layer.name))
 
   output_weights = tf.get_variable(
       "output_weights", [num_labels, hidden_size],
