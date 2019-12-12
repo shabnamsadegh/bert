@@ -43,7 +43,7 @@ def create_model(is_training, input_ids, input_mask, segment_ids, labels,
   
   #copied from hsm207/bert_attn_viz
   def extract_attention_weights(tf_graph):
-        num_layers = bert_config.num_hidden_layers
+        num_layers = 12 #todo bert_config.num_hidden_layers
         attns = [{'layer_%s' % i: tf_graph.get_tensor_by_name('bert/encoder/layer_%s/attention/self/Softmax:0' % i)}
                  for i in range(num_layers)]
 
@@ -71,6 +71,8 @@ def create_model(is_training, input_ids, input_mask, segment_ids, labels,
   seq_output = bert_outputs["sequence_output"]  
   
   hidden_size = output_layer.shape[-1].value
+    
+  tf.logging.info("Shabnam look! " + str(hidden_size))
 
   output_weights = tf.get_variable(
       "output_weights", [num_labels, hidden_size],
