@@ -25,6 +25,7 @@ import tokenization
 import tensorflow as tf
 import tensorflow_hub as hub
 import numpy as np
+import collections
 
 from explain.attention import average_last_layer_by_head, average_first_layer_by_head
 
