@@ -3,12 +3,6 @@ import tensorflow as tf
 import numpy as np
 from xml.etree.ElementTree import Element, SubElement, tostring
 
-try:
-    from bert_attn_viz.run_classifier import file_based_convert_examples_to_features, file_based_input_fn_builder
-except tf.flags.DuplicateFlagError:
-    pass
-
-
 def _parse_input_text(input_text, tokenizer, max_seq_length):
     tokens = tokenizer.tokenize(input_text)
     if len(tokens) > max_seq_length - 2:
