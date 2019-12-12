@@ -73,6 +73,9 @@ def create_model(is_training, input_ids, input_mask, segment_ids, labels,
   
   hidden_size = output_layer.shape[-1].value
   
+  for opr in tf.get_default_graph().get_operations():
+    tf.logging.info("Shabnam look! " + str(opr.name))
+
   output_weights = tf.get_variable(
       "output_weights", [num_labels, hidden_size],
       initializer=tf.truncated_normal_initializer(stddev=0.02))
