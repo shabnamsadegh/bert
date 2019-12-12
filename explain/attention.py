@@ -25,7 +25,7 @@ def average_last_layer_by_head(attentions):
         {'layer_name': (batch_size, num_multihead_attn, sequence_length, sequence_length)}
     :return: a tensor of weights
     """
-    last_multihead_attn = attentions[-1].values()[0]
+    last_multihead_attn = list(attentions[-1].values())[0]
 
     # For each multihead attention, get the attention weights going into the CLS token
     cls_attn = last_multihead_attn[:, :, 0, :]
@@ -52,7 +52,7 @@ def average_first_layer_by_head(attentions):
         {'layer_name': (batch_size, num_multihead_attn, sequence_length, sequence_length)}
     :return: a tensor of weights
     """
-    last_multihead_attn = attentions[0].values()[0]
+    last_multihead_attn = list(attentions[0].values())[0]
 
     # For each multihead attention, get the attention weights going into the CLS token
     cls_attn = last_multihead_attn[:, :, 0, :]
@@ -76,7 +76,7 @@ def average_layer_i_on_token_j_by_head(layer_index, token_index, attentions):
         {'layer_name': (batch_size, num_multihead_attn, sequence_length, sequence_length)}
     :return: a tensor of weights
     """
-    target_attention_layer = attentions[layer_index].values()[0]
+    target_attention_layer = list(attentions[layer_index].values())[0]
     token_attn = target_attention_layer[:, :, token_index, :]
 
     token_attn = tf.reduce_mean(token_attn, axis=1)
