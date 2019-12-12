@@ -44,7 +44,7 @@ def create_model(is_training, input_ids, input_mask, segment_ids, labels,
   #copied from hsm207/bert_attn_viz
   def extract_attention_weights(tf_graph):
         num_layers = 12 #todo bert_config.num_hidden_layers
-        attns = [{'layer_%s' % i: tf_graph.get_tensor_by_name('module/bert/encoder/layer_%s/attention/self/Softmax' % i)}
+        attns = [{'layer_%s' % i: tf_graph.get_tensor_by_name('module/bert/encoder/layer_%s/attention/self/Softmax:0' % i)}
                  for i in range(num_layers)]
 
         return attns
