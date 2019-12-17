@@ -36,7 +36,8 @@ def average_last_layer_by_head(attentions):
     # Normalize across tokens
     total_weights = tf.reduce_sum(cls_attn, axis=-1, keepdims=True)
     norm_cls_attn = cls_attn / total_weights
-
+    tf.logging.info("Attention look! " + str(norm_cls_attn.shape))
+    
     return norm_cls_attn
 
 
