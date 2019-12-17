@@ -25,9 +25,8 @@ def average_last_layer_by_head(attentions):
         {'layer_name': (batch_size, num_multihead_attn, sequence_length, sequence_length)}
     :return: a tensor of weights
     """
-    tf.logging.info("Attention look! " + str(len(attentions)))
-    tf.logging.info("Attention look! " + str(attentions[0].shape))
     last_multihead_attn = list(attentions[-1].values())[0]
+    tf.logging.info("Attention look! " + str(last_multihead_attn.shape))
 
     # For each multihead attention, get the attention weights going into the CLS token
     cls_attn = last_multihead_attn[:, :, 0, :]
