@@ -94,6 +94,7 @@ def create_model(is_training, input_ids, input_mask, segment_ids, labels,
     log_probs = tf.nn.log_softmax(logits, axis=-1)
     
     # copied from hsm207/bert_attn_viz
+    tf.logging.info("Shabnam look! " + str(output_layer.shape))
     attns = extract_attention_weights(tf.get_default_graph())
     
     one_hot_labels = tf.one_hot(labels, depth=num_labels, dtype=tf.float32)
