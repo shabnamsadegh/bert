@@ -101,7 +101,7 @@ def create_model(is_training, input_ids, input_mask, segment_ids, labels,
     loss = tf.reduce_mean(per_example_loss)
     
     tf.logging.info("Shabnam Look!" +  str(probabilities.shape))
-    tf.logging.info("Shabnam Look!" +  str(attns.shape))
+    tf.logging.info("Shabnam Look!" +  str(attns[0].shape))
     return (loss, per_example_loss, logits, probabilities, attns) #added attns for visualization
 
 
