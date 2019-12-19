@@ -173,7 +173,7 @@ def model_fn_builder(num_labels, learning_rate, num_train_steps,
       output_spec = tf.contrib.tpu.TPUEstimatorSpec(
           mode=mode, predictions={  'probabilities': probabilities,
                                     'pred_class': tf.argmax(probabilities, axis=1),
-                                    'attention': average_last_layer_by_head(attentions)
+                                    #'attention': average_last_layer_by_head(attentions)
                                   }) 
  
     else:
