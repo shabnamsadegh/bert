@@ -27,7 +27,7 @@ def average_last_layer_by_head(attentions):
     """
     last_multihead_attn = list(attentions[-1].values())[0]
     tf.logging.info("Attention look! " + str(last_multihead_attn.shape))
-    last_multihead_attn = tf.reshape(last_multihead_attn, [-1,12,128,128])
+    last_multihead_attn = tf.reshape(last_multihead_attn, [8,12,128,128])#todo important! these are hard coded. fix them
     tf.logging.info("Attention look! " + str(last_multihead_attn.shape))
     
     # For each multihead attention, get the attention weights going into the CLS token
