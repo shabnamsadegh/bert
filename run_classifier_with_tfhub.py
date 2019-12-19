@@ -145,11 +145,11 @@ def model_fn_builder(num_labels, learning_rate, num_train_steps,
         num_classes = logits[0].shape[-1].value
         average_method = 'micro'
 
-        precision = tf_metrics.precision(
+        precision = multi_metrics.precision(
             label_ids, predictions, num_classes, pos_indices=None, average=average_method)
-        recall = tf_metrics.recall(
+        recall = multi_metrics.recall(
             label_ids, predictions, num_classes, pos_indices=None, average=average_method)
-        f1 = tf_metrics.f1(
+        f1 = multi_metrics.f1(
             label_ids, predictions, num_classes, pos_indices=None, average=average_method)
 
         #accuracy = tf.metrics.accuracy(label_ids, predictions)
