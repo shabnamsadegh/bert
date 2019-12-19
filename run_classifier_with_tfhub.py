@@ -148,7 +148,7 @@ def model_fn_builder(num_labels, learning_rate, num_train_steps,
         fp = tf.metrics.false_positives(label_ids, predictions)
         tn = tf.metrics.true_negatives(label_ids, predictions)
         tp = tf.metrics.true_positives(label_ids, predictions)
-        f1 = tf.contrib.metrics.f1_score(label_ids, predictions)
+        f1 = 2 * precision * recall / (precision + recall)
 
         return collections.OrderedDict({
             "eval_accuracy": accuracy,
