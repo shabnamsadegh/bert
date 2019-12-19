@@ -23,6 +23,7 @@ import optimization
 import run_classifier
 import tokenization
 import tensorflow as tf
+import tensorflow_addons as tfa
 import tensorflow_hub as hub
 import numpy as np
 import collections
@@ -140,7 +141,7 @@ def model_fn_builder(num_labels, learning_rate, num_train_steps,
 
       def metric_fn(per_example_loss, label_ids, logits):
         predictions = tf.argmax(logits, axis=-1, output_type=tf.int32)
-        accuracy = tf.metrics.accuracy(label_ids, predictions)
+        #accuracy = tf.metrics.accuracy(label_ids, predictions)
         loss = tf.metrics.mean(per_example_loss)
         precision = tf.metrics.precision(label_ids, predictions)
         recall = tf.metrics.recall(label_ids, predictions)
@@ -148,17 +149,17 @@ def model_fn_builder(num_labels, learning_rate, num_train_steps,
         fp = tf.metrics.false_positives(label_ids, predictions)
         tn = tf.metrics.true_negatives(label_ids, predictions)
         tp = tf.metrics.true_positives(label_ids, predictions)
-        #f1 = 2 * precision * recall / (precision + recall)
+        f1_micro = tfa.metrics.F1Score(num_classes=len(logits[0]), average='micro')
 
         return collections.OrderedDict({
-            "eval_accuracy": accuracy,
+            #"eval_accuracy": accuracy,
             'eval_precision': precision,
             'eval_recall': recall,
             'eval_tp': tp,
             'eval_tn': tn,
             'eval_fp': fp,
             'eval_fn': fn,
-            #'eval_f1': f1,
+            'eval_f1_micro': f1_micro,
             "eval_loss": loss,
         })
         
