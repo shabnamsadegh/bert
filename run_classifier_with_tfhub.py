@@ -141,8 +141,8 @@ def model_fn_builder(num_labels, learning_rate, num_train_steps,
 
       def metric_fn(per_example_loss, label_ids, logits):
         predictions = tf.argmax(logits, axis=-1, output_type=tf.int32)
-        
-        num_classes = len(logits[0])
+        tf.loging.info("Shabnam look!" + str(logits[0]))
+        num_classes = logits[0].shape[-1].value
         average_method = 'micro'
 
         precision = tf_metrics.precision(
