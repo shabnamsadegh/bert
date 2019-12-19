@@ -43,12 +43,10 @@ def create_model(is_training, input_ids, input_mask, segment_ids, labels,
   """Creates a classification model."""
   
   #copied from hsm207/bert_attn_viz
-  def extract_attention_weights(tf_graph, batch_size, num_layers, max_seq_length):
+  def extract_attention_weights(tf_graph):
         num_layers = 12 #todo bert_config.num_hidden_layers
-        attns = [{'layer_%s' % i: tf.reshape(tf_graph.get_tensor_by_name('module/bert/encoder/layer_%s/attention/self/Softmax:0' % i),
-                                             tf.pack([batch_size, num_layers, max_seq_length, max_seq_length]))}
+        attns = [{'layer_%s' % i: tf_graph.get_tensor_by_name('module/bert/encoder/layer_%s/attention/self/Softmax:0' % i)}
                  for i in range(num_layers)]
-
         return attns
   
   tags = set()
@@ -95,7 +93,7 @@ def create_model(is_training, input_ids, input_mask, segment_ids, labels,
     log_probs = tf.nn.log_softmax(logits, axis=-1)
     
     # copied from hsm207/bert_attn_viz
-    attns = extract_attention_weights(tf.get_default_graph(), input_ids.shape[0],12, FLAGS.max_seq_length,FLAGS.max_seq_length )#todo how to get these values in a more reasonable fashion? 
+    attns = extract_attention_weights(tf.get_default_graph())
     
     one_hot_labels = tf.one_hot(labels, depth=num_labels, dtype=tf.float32)
 
