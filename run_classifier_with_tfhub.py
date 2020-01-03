@@ -86,7 +86,7 @@ def create_model(is_training, input_ids, input_mask, segment_ids, labels,
   with tf.variable_scope("loss"):
     if is_training:
       # I.e., 0.1 dropout
-      output_layer = tf.nn.dropout(output_layer, keep_prob=0.5)#0.9 I changed it to 0.7 because the topics are very close to each other and harder to learn
+      output_layer = tf.nn.dropout(output_layer, keep_prob=0.9)
 
     logits = tf.matmul(output_layer, output_weights, transpose_b=True)
     logits = tf.nn.bias_add(logits, output_bias)
