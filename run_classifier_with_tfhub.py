@@ -150,7 +150,9 @@ def model_fn_builder(num_labels, learning_rate, num_train_steps,
         recall = multi_metrics.recall(
             label_ids, predictions, num_classes, pos_indices=None, average=average_method)
         f1 = multi_metrics.f1(
-            label_ids, predictions, num_classes, pos_indices=None, average=average_method)
+            label_ids, predictions, num_classes, pos_indices=None, average="micro")
+        f1_macro = multi_metrics.f1(
+            label_ids, predictions, num_classes, pos_indices=None, average="macro")
 
         #accuracy = tf.metrics.accuracy(label_ids, predictions)
         loss = tf.metrics.mean(per_example_loss)
@@ -161,6 +163,7 @@ def model_fn_builder(num_labels, learning_rate, num_train_steps,
             'eval_precision_micro': precision,
             'eval_recall_micro': recall,
             'eval_f1_micro': f1,
+            'eval_f1_macro': f1_macro,
             "eval_loss": loss,
         })
         
